@@ -96,7 +96,7 @@ func (m *LinkedMap) MoveBefore(key, mark interface{}) (ok bool) {
 		return false
 	}
 
-	markValue, exists := m.hashMap[key]
+	markValue, exists := m.hashMap[mark]
 	if !exists {
 		return false
 	}
@@ -112,7 +112,7 @@ func (m *LinkedMap) MoveAfter(key, mark interface{}) (ok bool) {
 		return false
 	}
 
-	markValue, exists := m.hashMap[key]
+	markValue, exists := m.hashMap[mark]
 	if !exists {
 		return false
 	}
@@ -123,23 +123,23 @@ func (m *LinkedMap) MoveAfter(key, mark interface{}) (ok bool) {
 // Front returns the first key and value of the map.
 func (m *LinkedMap) Front() (key, value interface{}, ok bool) {
 	m.lazyInit()
-	key = m.keys.Front().Value
-	mapValue, exists := m.hashMap[key]
-	if !exists {
+	frontKey := m.keys.Front()
+	if frontKey == nil {
 		return nil, nil, false
 	}
-	return key, mapValue.value, true
+	key = frontKey.Value
+	return key, m.hashMap[key].value, true
 }
 
-// Front returns the last key and value of the map.
+// Back returns the last key and value of the map.
 func (m *LinkedMap) Back() (key, value interface{}, ok bool) {
 	m.lazyInit()
-	key = m.keys.Back().Value
-	mapValue, exists := m.hashMap[key]
-	if !exists {
+	backKey := m.keys.Back()
+	if backKey == nil {
 		return nil, nil, false
 	}
-	return key, mapValue.value, true
+	key = backKey.Value
+	return key, m.hashMap[key].value, true
 }
 
 // Has returns whether has the key
