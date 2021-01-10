@@ -151,7 +151,10 @@ func (m *LinkedMap) Has(key interface{}) (has bool) {
 // Load returns value in the map for the key
 func (m *LinkedMap) Load(key interface{}) (val interface{}, ok bool) {
 	mapVal, ok := m.hashMap[key]
-	return mapVal.value, ok
+	if !ok {
+		return nil, false
+	}
+	return mapVal.value, true
 }
 
 // Remove removes key in the map, and returns that value
