@@ -22,8 +22,12 @@ func New() *LinkedMap {
 	return new(LinkedMap).Init()
 }
 
+func (m *LinkedMap) inited() bool {
+	return m.hashMap != nil && m.keys != nil
+}
+
 func (m *LinkedMap) lazyInit() {
-	if m.hashMap == nil || m.keys == nil {
+	if !m.inited() {
 		m.Init()
 	}
 }
@@ -38,12 +42,11 @@ func (m *LinkedMap) Init() *LinkedMap {
 // Set sets value for key to end of the map,
 // updates existing keys.
 func (m *LinkedMap) Set(key interface{}, val interface{}) (isNewKey bool) {
-	m.lazyInit()
 	if mapVal, exists := m.hashMap[key]; exists {
 		mapVal.value = val
 		return false
 	}
-
+	m.lazyInit()
 	mapVal := new(linkedMapElement)
 	mapVal.keyElement = m.keys.PushBack(key)
 	mapVal.value = val
@@ -54,11 +57,10 @@ func (m *LinkedMap) Set(key interface{}, val interface{}) (isNewKey bool) {
 // Add adds value for key to end of the map,
 // ignores existing keys.
 func (m *LinkedMap) Add(key interface{}, val interface{}) (isNewKey bool) {
-	m.lazyInit()
 	if _, exists := m.hashMap[key]; exists {
 		return false
 	}
-
+	m.lazyInit()
 	mapVal := new(linkedMapElement)
 	mapVal.keyElement = m.keys.PushBack(key)
 	mapVal.value = val
@@ -68,7 +70,6 @@ func (m *LinkedMap) Add(key interface{}, val interface{}) (isNewKey bool) {
 
 // MoveToBack moves key to the back of the map.
 func (m *LinkedMap) MoveToBack(key interface{}) (ok bool) {
-	m.lazyInit()
 	mapValue, exists := m.hashMap[key]
 	if !exists {
 		return false
@@ -79,7 +80,6 @@ func (m *LinkedMap) MoveToBack(key interface{}) (ok bool) {
 
 // MoveToBack moves key to the front of the map.
 func (m *LinkedMap) MoveToFront(key interface{}) (ok bool) {
-	m.lazyInit()
 	mapValue, exists := m.hashMap[key]
 	if !exists {
 		return false
@@ -90,7 +90,6 @@ func (m *LinkedMap) MoveToFront(key interface{}) (ok bool) {
 
 // MoveBefore moves key to its new position before mark.
 func (m *LinkedMap) MoveBefore(key, mark interface{}) (ok bool) {
-	m.lazyInit()
 	mapValue, exists := m.hashMap[key]
 	if !exists {
 		return false
@@ -106,7 +105,6 @@ func (m *LinkedMap) MoveBefore(key, mark interface{}) (ok bool) {
 
 // MoveBefore moves key to its new position after mark.
 func (m *LinkedMap) MoveAfter(key, mark interface{}) (ok bool) {
-	m.lazyInit()
 	mapValue, exists := m.hashMap[key]
 	if !exists {
 		return false
@@ -122,7 +120,9 @@ func (m *LinkedMap) MoveAfter(key, mark interface{}) (ok bool) {
 
 // Front returns the first key and value of the map.
 func (m *LinkedMap) Front() (key, value interface{}, ok bool) {
-	m.lazyInit()
+	if !m.inited() {
+		return nil, nil, false
+	}
 	frontKey := m.keys.Front()
 	if frontKey == nil {
 		return nil, nil, false
@@ -133,7 +133,9 @@ func (m *LinkedMap) Front() (key, value interface{}, ok bool) {
 
 // Back returns the last key and value of the map.
 func (m *LinkedMap) Back() (key, value interface{}, ok bool) {
-	m.lazyInit()
+	if !m.inited() {
+		return nil, nil, false
+	}
 	backKey := m.keys.Back()
 	if backKey == nil {
 		return nil, nil, false
@@ -159,19 +161,21 @@ func (m *LinkedMap) Load(key interface{}) (val interface{}, ok bool) {
 
 // Remove removes key in the map, and returns that value
 func (m *LinkedMap) Remove(key interface{}) (val interface{}, ok bool) {
-	m.lazyInit()
 	mapVal, exists := m.hashMap[key]
 	if !exists {
 		return nil, false
 	}
 	delete(m.hashMap, key)
-	return m.keys.Remove(mapVal.keyElement), true
+	m.keys.Remove(mapVal.keyElement)
+	return mapVal.value, true
 }
 
 // Range calls f for each key value in the map.
 // If f returns false, break the iteration.
 func (m *LinkedMap) Range(f func(key, value interface{}) bool) {
-	m.lazyInit()
+	if !m.inited() {
+		return
+	}
 	for elem := m.keys.Front(); elem != nil; elem = elem.Next() {
 		if !f(elem.Value, m.hashMap[elem.Value].value) {
 			break
@@ -203,6 +207,5 @@ func (m *LinkedMap) String() string {
 
 // Len returns the map current length
 func (m *LinkedMap) Len() int {
-	new(list.List).Len()
 	return len(m.hashMap)
 }

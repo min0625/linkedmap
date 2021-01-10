@@ -19,36 +19,277 @@ func TestLinkedMap(t *testing.T) {
 	)
 
 	m := New()
-	if !checkMap(t, m, []*element{}) {
+	if !checkMap(t, "New()", m, []*element{}) {
+		return
+	}
+
+	if isNewKey := m.Add(key1, val1); !isNewKey {
+		t.Errorf("Add() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Add()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+	}) {
+		return
+	}
+
+	if isNewKey := m.Add(key2, val2); !isNewKey {
+		t.Errorf("Add() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Add()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val2,
+		},
+	}) {
+		return
+	}
+
+	if isNewKey := m.Add(key3, val3); !isNewKey {
+		t.Errorf("Add() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Add()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val2,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if isNewKey := m.Add(key2, "some value"); isNewKey {
+		t.Errorf("Add() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Add()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val2,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if val, ok := m.Remove(key2); !ok || !reflect.DeepEqual(val, val2) {
+		t.Errorf("Remove() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Remove()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	// test remove not exists key
+	if val, ok := m.Remove(key2); ok || val != nil {
+		t.Errorf("Remove() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Remove()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if isNewKey := m.Set(key2, val2); !isNewKey {
+		t.Errorf("Set() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Set()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+		{
+			key:   key2,
+			value: val2,
+		},
+	}) {
+		return
+	}
+
+	if isNewKey := m.Set(key2, val3); isNewKey {
+		t.Errorf("Set() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Set()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+		{
+			key:   key2,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if ok := m.MoveToBack(key3); !ok {
+		t.Errorf("MoveToBack() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "MoveToBack()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val3,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	// test not exist key
+	if ok := m.MoveToBack(new(int)); ok {
+		t.Errorf("MoveToBack() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "MoveToBack()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val3,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if ok := m.MoveToFront(key3); !ok {
+		t.Errorf("MoveToFront() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "MoveToFront()", m, []*element{
+		{
+			key:   key3,
+			value: val3,
+		},
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if ok := m.MoveBefore(key1, key3); !ok {
+		t.Errorf("MoveBefore() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "MoveBefore()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+		{
+			key:   key2,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if ok := m.MoveAfter(key3, key2); !ok {
+		t.Errorf("MoveAfter() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "MoveAfter()", m, []*element{
+		{
+			key:   key1,
+			value: val1,
+		},
+		{
+			key:   key2,
+			value: val3,
+		},
+		{
+			key:   key3,
+			value: val3,
+		},
+	}) {
+		return
+	}
+
+	if m != m.Init() {
+		t.Errorf("Init() returns value is unexpected")
+		return
+	}
+	if !checkMap(t, "Init()", m, []*element{}) {
 		return
 	}
 
 	m.Add(key1, val1)
-	if !checkMap(t, m, []*element{
-		{
-			key:   key1,
-			value: val1,
-		},
-	}) {
-		return
-	}
-
 	m.Add(key2, val2)
-	if !checkMap(t, m, []*element{
-		{
-			key:   key1,
-			value: val1,
-		},
-		{
-			key:   key2,
-			value: val2,
-		},
-	}) {
-		return
-	}
-
 	m.Add(key3, val3)
-	if !checkMap(t, m, []*element{
+	if !checkReadMap(t, m, []*element{
 		{
 			key:   key1,
 			value: val1,
@@ -60,52 +301,6 @@ func TestLinkedMap(t *testing.T) {
 		{
 			key:   key3,
 			value: val3,
-		},
-	}) {
-		return
-	}
-
-	m.Remove(key2)
-	if !checkMap(t, m, []*element{
-		{
-			key:   key1,
-			value: val1,
-		},
-		{
-			key:   key3,
-			value: val3,
-		},
-	}) {
-		return
-	}
-
-	m.Set(key1, val2)
-	if !checkMap(t, m, []*element{
-		{
-			key:   key1,
-			value: val2,
-		},
-		{
-			key:   key3,
-			value: val3,
-		},
-	}) {
-		return
-	}
-
-	m.Set(key2, val1)
-	if !checkMap(t, m, []*element{
-		{
-			key:   key1,
-			value: val2,
-		},
-		{
-			key:   key3,
-			value: val3,
-		},
-		{
-			key:   key2,
-			value: val1,
 		},
 	}) {
 		return
@@ -115,6 +310,69 @@ func TestLinkedMap(t *testing.T) {
 type element struct {
 	key   interface{}
 	value interface{}
+}
+
+func checkMap(t *testing.T, name string, m *LinkedMap, es []*element) bool {
+	esLen := len(es)
+	if esLen != len(m.hashMap) {
+		t.Errorf("%s: len(m.hashMap) is unexpected", name)
+		return false
+	}
+	if esLen != m.keys.Len() {
+		t.Errorf("%s: m.keys.Len() is unexpected", name)
+		return false
+	}
+
+	idx := 0
+	for ketElem := m.keys.Front(); ketElem != nil; ketElem = ketElem.Next() {
+		mKey := ketElem.Value
+		mVal, exists := m.hashMap[mKey]
+		if !exists {
+			t.Errorf("%s: key %v not exists in the map", name, mKey)
+			return false
+		}
+
+		e := es[idx]
+		if mKey != e.key {
+			t.Errorf("%s: map key %v is unexpected, want %v", name, mKey, e.key)
+			return false
+		}
+
+		if reflect.DeepEqual(mVal, e.value) {
+			t.Errorf("%s: map[%v] value %v is unexpected, want %v", name, mKey, mVal, e.value)
+			return false
+		}
+
+		idx++
+	}
+	return true
+}
+
+func checkReadMap(t *testing.T, m *LinkedMap, es []*element) bool {
+	if !checkLen(t, m, len(es)) {
+		return false
+	}
+
+	if !checkRange(t, m, es) {
+		return false
+	}
+
+	if !checkLoad(t, m, es) {
+		return false
+	}
+
+	if !checkHas(t, m, es) {
+		return false
+	}
+
+	if !checkFront(t, m, es) {
+		return false
+	}
+
+	if !checkBack(t, m, es) {
+		return false
+	}
+	return true
 }
 
 func checkLen(t *testing.T, m *LinkedMap, len int) bool {
@@ -193,7 +451,7 @@ func checkFront(t *testing.T, m *LinkedMap, es []*element) bool {
 		return false
 	}
 
-	if !reflect.DeepEqual(key, e.key) || !reflect.DeepEqual(val, e.value) {
+	if key != e.key || !reflect.DeepEqual(val, e.value) {
 		t.Errorf("Front() got key or value is unexpected")
 		return false
 	}
@@ -215,7 +473,7 @@ func checkBack(t *testing.T, m *LinkedMap, es []*element) bool {
 		return false
 	}
 
-	if !reflect.DeepEqual(key, e.key) || !reflect.DeepEqual(val, e.value) {
+	if key != e.key || !reflect.DeepEqual(val, e.value) {
 		t.Errorf("Back() got key or value is unexpected")
 		return false
 	}
@@ -234,33 +492,5 @@ func checkHas(t *testing.T, m *LinkedMap, es []*element) bool {
 			return false
 		}
 	}
-	return true
-}
-
-func checkMap(t *testing.T, m *LinkedMap, es []*element) bool {
-	if !checkLen(t, m, len(es)) {
-		return false
-	}
-
-	if !checkRange(t, m, es) {
-		return false
-	}
-
-	if !checkLoad(t, m, es) {
-		return false
-	}
-
-	if !checkHas(t, m, es) {
-		return false
-	}
-
-	if !checkFront(t, m, es) {
-		return false
-	}
-
-	if !checkBack(t, m, es) {
-		return false
-	}
-
 	return true
 }
